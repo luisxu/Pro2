@@ -1,0 +1,368 @@
+/**
+ * @file Organigram.cpp
+ * @brief Organigram implementation
+ */
+#include "Organigram.hpp"
+
+Organigram::Organigram()
+{
+    id_app = 0;
+}
+
+Organigram::~Organigram()
+{}
+
+void Organigram::cut_tree(Arbre<int>& a, int id_offi)
+{
+	if (a.es_buit()) return;
+	if (a.arrel() == id_offi) return;
+	else 
+	{
+	    Arbre<int> a1;
+	    Arbre<int> a2;
+	    a.fills(a1, a2);
+	    cut_tree(a1, id_offi);
+	    if (not a1.es_buit()) a = a1;
+	    else 
+	    {
+		cut_tree(a2, id_offi);
+		a = a2;
+	    }
+	}
+}
+
+void Organigram::remove_offis(Agenda& agenda, list<int>& path, int can_day, int can_hour)
+{
+    list<int>::iterator it = ++path.begin();
+    while (it != path.end()) {
+	int value = agenda.consult_first_value(can_day, *it, can_hour);
+	if (value == -1) it = path.erase(it);
+	else ++it;
+    }
+}
+	
+void Organigram::move_apps(Agenda& agenda, list<int>& path, int can_day, int can_hour)
+{
+    remove_offis(agenda, path, can_day, can_hour);
+    list<int>::iterator it1 = path.begin();
+    list<int>::iterator it2 = ++it1;
+    --it1;
+    while (it2 != path.end()) 
+    {
+        int app_id = agenda.consult_first_value(can_day, *it2, can_hour);
+        int second_value = agenda.consult_second_value(can_day, *it2, can_hour);
+        agenda.modify_first_value(app_id, can_day, *it1, can_hour);
+        agenda.modify_second_value(second_value, can_day, *it1, can_hour);
+        ++it1;
+	++it2;	
+    }
+}
+
+int Organigram::assign_candidate_less_level(Arbre<int>& a, Agenda& agenda, int app_hour, int app_day, bool& found, int& depth)
+{
+    int id_offi;
+    if (not a.es_buit()) 
+    {
+	int root = a.arrel();
+        if (agenda.consult_first_value(app_day, root, app_hour) == 0)    // is avaliable
+        {
+            depth = 0;
+            found = true;
+	    id_offi = root;
+	}
+        else {
+	    Arbre<int> a1;
+	    Arbre<int> a2;
+	    a.fills(a1, a2);
+	    bool found_1, found_2;
+            int depth_1, depth_2;
+            int id_offi1 = assign_candidate_less_level(a1, agenda, app_hour, app_day, found_1, depth_1);
+            int id_offi2 = assign_candidate_less_level(a2, agenda, app_hour, app_day, found_2, depth_2);
+            if (found_1 and found_2) 
+            {
+                depth_1 = depth_1 + 1;
+                depth_2 = depth_2 + 1;
+                if (depth_1 <= depth_2) {
+                	id_offi = id_offi1;
+                	depth = depth_1;
+                }
+                else {
+                	id_offi = id_offi2;
+                	depth = depth_2;
+                }
+            }
+            else if (found_1) 
+            {
+                depth = depth_1 + 1;
+                id_offi = id_offi1;
+            }
+            else if (found_2) 
+            {
+                depth = depth_2 + 1;
+                id_offi = id_offi2;
+            }
+            found = found_1 or found_2;
+            a.plantar(root, a1, a2);
+	}      
+    }
+    else found = false;
+    if (found) return id_offi;
+    else return -1;
+}
+
+int Organigram::assign_candidate_maximum_n_level(Arbre<int>& a, Agenda& agenda, int app_day, int app_hour, int& level_aux, int level, bool& found, int& depth)
+{
+    int id_offi;
+    if (level_aux <= level and not a.es_buit()) 
+    {
+	int root = a.arrel();
+        if (agenda.consult_first_value(app_day, root, app_hour) == 0) 
+        {
+	    depth = 0;
+	    found = true;
+	    id_offi = root;
+	}
+	else 
+	{
+	    ++level_aux;
+	    Arbre<int> a1;
+	    Arbre<int> a2;
+	    a.fills(a1, a2);
+	    bool found_1, found_2;
+            int depth_1, depth_2;
+            int id_offi1 = assign_candidate_maximum_n_level(a1, agenda, app_day, app_hour, level_aux, level, found_1, depth_1);
+            int id_offi2 = assign_candidate_maximum_n_level(a2, agenda, app_day, app_hour, level_aux, level, found_2, depth_2);
+            if (found_1 and found_2) 
+            {
+                depth_1 = depth_1 + 1;
+                depth_2 = depth_2 + 1;
+                if (depth_1 <= depth_2) {
+                	id_offi = id_offi1;
+                	depth = depth_1;
+                }
+                else {
+                	id_offi = id_offi2;
+                	depth = depth_2;
+                }           
+            }
+            else if (found_1) 
+            {
+		depth = depth_1 + 1;
+		id_offi = id_offi1;
+	    }
+            else if (found_2) 
+            {
+		depth = depth_2 + 1;
+		id_offi = id_offi2;
+	    }
+	    found = found_1 or found_2;
+            --level_aux;
+            a.plantar(root, a1, a2);
+	  } 
+      }
+    else found = false;
+    if (found) return id_offi;
+    else return -1;
+}
+
+
+void Organigram::make_path(Arbre<int>& a, Agenda& agenda, list<int>& L, int can_hour, int can_day, bool& found, int& depth)
+{
+	if (not a.es_buit()) 
+	{
+	    int root = a.arrel();
+	    if (agenda.consult_first_value(can_day, root, can_hour) == 0) 
+	    {
+		found = true;
+		depth = 0;
+		list<int>::iterator it = L.begin();
+		L.insert(it, root);
+	     }
+	     else 
+	     {
+		Arbre<int> a1;
+		Arbre<int> a2;
+		a.fills(a1, a2);
+		bool found_1, found_2;
+		int depth_1, depth_2;
+		list<int> L1, L2;
+		list<int>::iterator it_1 = L1.begin();
+		list<int>::iterator it_2 = L2.begin();
+		make_path(a1, agenda, L1, can_hour, can_day, found_1, depth_1);
+		make_path(a2, agenda, L2, can_hour, can_day, found_2, depth_2);
+			
+		if (found_1 and found_2) 
+		{
+		    depth = depth_1 + 1;
+		    depth = depth_2 + 1;
+		    if (depth_1 <= depth_2) 
+		    {
+			L1.insert(it_1, root);
+			L = L1;
+		    }
+		    else 
+		    {
+			L2.insert(it_2, root);
+			L = L2;
+		    }
+		 }
+		 else if (found_1) 
+		 {
+			depth = depth_1 + 1;
+			L1.insert(it_1, root);
+			L = L1;
+		 }
+		 else if (found_2) 
+		 {
+		      depth = depth_2 + 1;
+		      L2.insert(it_2, root);
+				L = L2;
+			}
+			found = found_1 or found_2;
+		}
+	}
+	else found = false;
+}	
+		
+void Organigram::read_structure(Arbre<int>& a, int mark)
+{
+	int root;
+	root = readint();
+	if (root != mark) 
+	{
+	    Arbre<int> a1;
+	    Arbre<int> a2;
+	    read_structure(a1, mark);
+	    read_structure(a2, mark);
+	    a.plantar(root, a1, a2);
+	}
+}
+
+void Organigram::new_app_req_day(Agenda& agenda, int app_day, int app_hour, int limit_day)
+{
+    if (app_day < limit_day)
+    {
+// 		cout << "el app_day es " << app_day << endl;
+// // cout << "el limit_day es " << limit_day << endl;
+    	bool found;
+    	int id_offi;
+    	int depth;
+    	id_offi = assign_candidate_less_level(nodes, agenda, app_hour, app_day, found, depth);
+    	if (not found)
+    	{
+        	++app_day;
+        	new_app_req_day(agenda, app_day, app_hour, limit_day);
+    	}
+    	else
+    	{
+        	int second_value = -1;     // model 1    
+        	++id_app;
+        	agenda.add_apps_alive(app_day, id_offi, app_hour, id_app, second_value);
+		}
+	}
+}
+
+void Organigram::new_app_req_level(Agenda& agenda, int app_day, int app_hour, int level, int limit_day)
+{
+	if (app_day < limit_day) 
+	{
+		int level_aux = 0;
+		bool found;
+		int id_offi;
+		int depth;
+		id_offi = assign_candidate_maximum_n_level(nodes, agenda, app_day, app_hour, level_aux, level, found, depth);
+		if (not found) 
+		{
+		    ++app_day;
+		    new_app_req_level(agenda, app_day, app_hour, level, limit_day);
+		}
+		else 
+		{
+		    ++id_app;
+		    agenda.add_apps_alive(app_day, id_offi, app_hour, id_app, level); 
+		}
+	}
+}
+
+// 	
+void Organigram::can_req_offi_range(Agenda& agenda, int id_offi, int first_day, int limit_day, int H)
+{
+    bool continu = true;
+    int working_time = H;
+    for (int i = first_day; i <= limit_day and continu; ++i)
+    {
+        for (int j = 1; j <= working_time; ++j) 
+        {
+            if (agenda.consult_first_value(i, id_offi, j) > 0) continu = false;    // if has any appointment, it will be refused 
+        }
+    }
+    if (continu) 
+    {
+        for (int x = first_day; x <= limit_day; ++x) 
+        {
+            for (int y = 1; y <= working_time; ++y) {
+                agenda.set_non_working(x, id_offi, y);
+            }
+	}
+    }
+}
+
+void Organigram::can_req_offi_day_hour(Agenda& agenda, int id_offi, int can_day, int can_hour, int limit_day)
+{
+	if (agenda.consult_first_value(can_day, id_offi, can_hour) != -1) {   // means that is free o has some appointments
+	int aux = can_day;
+	if (agenda.consult_first_value(can_day, id_offi, can_hour) > 0) {
+	    Arbre<int> tree(nodes);   // copy the original tree **nodes**
+	    cut_tree(tree, id_offi); 
+	    int depth;
+	    bool found;
+	    list<int> path;	
+	    make_path(tree, agenda, path, can_hour, can_day, found, depth); 
+	    if (found) move_apps(agenda, path, can_day, can_hour);
+	    else {
+		int m = agenda.consult_model(can_day, id_offi, can_hour);
+            	int app_id = agenda.consult_first_value(can_day, id_offi, can_hour);
+           	bool end = false;
+           	int id_candidate;
+		if (m == 1) 
+		{
+		    ++can_day;
+		    while (not end and can_day <= limit_day) 
+		    {
+                    	id_candidate = assign_candidate_less_level(nodes, agenda, can_hour, can_day, found, depth);
+                    	if (found) end = true;
+                    	else ++can_day;
+		    }
+		    if (end) {
+			agenda.modify_first_value(app_id, can_day, id_candidate, can_hour);
+                	agenda.modify_second_value(m, can_day, id_candidate, can_hour);
+		    }
+		}
+		else if (m == 2) 
+		{
+		      int level = agenda.consult_second_value(can_day, id_offi, can_hour);
+		      ++can_day;
+		      int level_aux = 0;
+		      while (not end and can_day <= limit_day) 
+		      {
+			  id_candidate = assign_candidate_maximum_n_level(nodes, agenda, can_day, can_hour, level_aux, level, found, depth);
+			  if (found) end = true;
+			  else ++can_day;
+		      }
+		      if (end) {
+                	agenda.modify_first_value(app_id, can_day, id_candidate, can_hour);
+                	agenda.modify_second_value(m, can_day, id_candidate, can_hour);
+		      }
+            	}
+	    }
+	}
+    	agenda.set_non_working(aux, id_offi, can_hour);
+    }
+}
+
+void Organigram::read_organigram()
+{
+	read_structure(nodes, 0);
+}
+
+

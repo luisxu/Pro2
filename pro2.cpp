@@ -1,0 +1,158 @@
+/**
+ * @file pro2.cpp
+ * @brief Main program of the Management Agenda.
+ * 
+ * @mainpage AGENDA DE UNA ADMINISTRACIÓN
+ * 
+ * The program is implemented in C++.
+ * The program shows the Japan Management Agenda during the Nara and Heian periods. 
+ * That tries to simulate the operation of appointments requests or cancellations requests, 
+ * also it will support for consultations. 
+ * The system can handle requests and show statistics based in them.
+ * 
+ * The possible actions that can handle the system are:
+ * - Handle new appointments requests of citziens
+ * - Handle the cancellations requests of officials 
+ * - Support consultations of appointments performed based on the register day
+ * - Support consultations of appointments alives based on the register day
+ *
+ * For more information and see the statement of this practice:
+ * http://php5.lsi.upc.edu/pro2/data/uploads/enun.txt
+ * 
+ * To see information about the input:
+ * http://php5.lsi.upc.edu/pro2/data/uploads/jpinfo.txt
+ */
+
+#include "Agenda.hpp"
+#include "Organigram.hpp"
+#include "utils.PRO2"
+
+/**
+ * A new appointment request option value.
+ */
+#define NEW_APP_REQ -1
+
+/**
+ * The cancellation request option value.
+ */
+#define CAN_REQ_OFFI -2
+
+/**
+ * The consultation for appointments done
+ */
+#define CON_APP_DONE -3
+
+/**
+ * The consultation for appointments alive
+ */
+#define CON_APP_ALIVE -4
+
+/**
+ * System end option value.
+ */
+#define SYS_END -5
+
+/**
+ * To start the main application logic, and perform the options necessary
+ *  - First read the number total of officials(N); the agenda day available(D); the relevant day (K);
+ *	the daily hours of officials (H).
+ *  - Then read the Organigram, based on hierarchical relationships between officials.
+ *  - Finally the program will be processed the different tasks in the system.
+ */
+
+int main()
+{
+	int N = readint();
+	int D = readint();
+	int K = readint();
+	int H = readint();
+	
+	Organigram orga;  // Creates an Organigram 
+	orga.read_organigram();
+	
+	Agenda agenda(H, N, D);
+	
+	int op = readint();
+	int pre_reg_day;
+	bool first = true;
+	while (op != SYS_END)
+	{	
+	    int reg_day = readint();  // the register day
+	    if (first) first = false;
+	    else if (pre_reg_day < reg_day) 
+	    {
+		int limit_day = pre_reg_day-K;
+		if (limit_day <= 0) limit_day = 1;
+		agenda.advance_days(limit_day, pre_reg_day, reg_day, K);
+	    }
+	    pre_reg_day = reg_day;
+	    if (op == NEW_APP_REQ)
+	    {
+		int m = readint();  // the request model
+		if (m == 1) 
+		{
+		    int app_day = readint();  // the appointment day
+		    int app_hour = readint();
+		    int limit_day = reg_day + D+1;
+		    if ((app_day-reg_day) <= D) orga.new_app_req_day(agenda, app_day, app_hour, limit_day);
+		}
+		else if (m == 2) 
+		{
+		    int app_hour = readint();
+		    int level = readint();
+		    int favorite_day = reg_day + 1;
+		    int limit_day = favorite_day + D;
+		    orga.new_app_req_level(agenda, favorite_day, app_hour, level, limit_day);
+		}
+	    }
+	    else if (op == CAN_REQ_OFFI)
+	    {
+		int m = readint();
+		int id_offi = readint();
+		if (m == 1)
+		{
+		    int first_day = readint();
+		    int last_day = readint();
+		    if ((first_day-reg_day) <= D) 
+		    {
+			int limit_day = reg_day + D;
+			if (limit_day >= last_day) limit_day = last_day;
+			orga.can_req_offi_range(agenda, id_offi, first_day, limit_day, H);
+		    }
+		}
+		else if (m == 2) 
+		{
+		    int can_day = readint();
+		    int can_hour = readint();
+		    if ((can_day-reg_day) <= D) 
+		    {
+			int limit_day = reg_day + D;
+			orga.can_req_offi_day_hour(agenda, id_offi, can_day, can_hour, limit_day);
+		    }
+		}
+	    }
+	    else if (op == CON_APP_DONE) 
+	    {
+		int d2 = reg_day - 1;
+		int d1 = reg_day - K;
+		if (d1 <= 1) d1 = 1;
+		cout << "Citas ya realizadas: el intervalo relevante de dias es " << d1 << " " << d2 << endl;
+		if (d1 < d2) agenda.consult_app_done(d1, d2);
+		cout << endl;
+	    }
+	    else if (op == CON_APP_ALIVE) 
+	    { 
+		int d1 = reg_day + 1;
+		int d2 = reg_day + D;
+		cout << "Citas vivas: el intervalo relevante de dias es " << d1 << " " << d2 << endl;
+		agenda.consult_app_alive(d1, d2);
+	    }
+	    op = readint();
+	}
+}
+
+	
+	
+	
+	
+	

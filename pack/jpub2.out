@@ -1,0 +1,35 @@
+Citas vivas: el intervalo relevante de dias es 2 5
+2 1 1
+2 2 2
+2 3 3
+2 4 7
+2 5 8
+2 6 10
+3 1 4
+3 2 9
+4 1 5
+5 1 6
+
+Citas ya realizadas: el intervalo relevante de dias es 2 4
+2 1 1
+2 2 2
+2 3 3
+2 4 7
+2 5 8
+2 6 10
+3 1 4
+3 2 9
+4 1 5
+
+Citas ya realizadas: el intervalo relevante de dias es 3 5
+3 1 4
+3 2 9
+4 1 5
+5 1 6
+
+Citas vivas: el intervalo relevante de dias es 9 12
+9 1 11
+
+Citas ya realizadas: el intervalo relevante de dias es 5 7
+5 1 6
+

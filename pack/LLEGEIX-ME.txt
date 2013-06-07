@@ -1,0 +1,52 @@
+Aquesta carpeta conte els següents fitxers:
+
+0) LLEGEIX-ME.txt             - el fitxer que teniu endavant
+1) enun_expra.pdf             - enunciat d'aquest examen
+2) enun_orig.txt              - enunciat original de la pràctica 
+3) jpinfo_expra.txt           - informació sobre els jocs de proves de l'examen
+4) jpub1.in i .out, jpub2.in i .out  - jps públics de l'examen
+5) pro2.cpp                   - programa principal 
+6) Organigrama.hpp i .cpp     - plantilles per a la classe Organigrama
+8) Agenda.hpp i .cpp          - plantilles per a la classe Agenda  
+7) Historico.hpp i .cpp       - classe Historico
+9) Arbre.hpp                  - classe Arbre
+10) utils.PRO2 
+11) Makefile                  - instruccions del "make"
+
+Instruccions pel lliurament:
+
+1) Una vegada descomprimit el material, no cal crear fitxers nous, nomes
+   completeu els 3 que us demanem
+
+2) El programa s'ha de compilar amb 
+
+   g++ -c *.cpp -D_GLIBCXX_DEBUG
+
+3) El programa ha d'enllaçar correctament amb
+
+   g++ -o pro2.exe *.o
+
+4) Recomanem compilar i generar l'executable amb la comanda "make". 
+   Aquesta comanda consulta per defecte les instruccions del fitxer "Makefile".
+
+5) S'ha de lliurar només el fitxer ENTREGA_NOMES_AQUEST.zip, resultat
+   d'executar 
+
+   make empaquetar
+
+6) Per obtenir una nota més gran que 0, es condició necessària que el
+   programa produeixi zero diferències amb
+
+   ./pro2.exe < jpub1.in > mijpub1.out
+   diff -bB jpub1.out mijpub1.out
+
+   o be amb
+
+   ./pro2.exe < jpub2.in > mijpub2.out
+   diff -bB jpub2.out mijpub2.out
+
+7) Òbviament, la vostra nota serà més bona si el programa funciona be
+   amb els dos jocs de proves i, probablement, millor encara si el
+   proveu amb jocs de proves vostres, ja que per a la correcció farem
+   servir jocs de proves privats.
+

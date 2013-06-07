@@ -1,0 +1,247 @@
+PRÁCTICA DE PRO2 Cuatrimestre primavera 2013 - JUEGO DE PRUEBAS PÚBLICO
+
+Esquema del documento:
+
+0. Observaciones previas.
+1. Composición de los juegos de pruebas.
+2. Entrada y salida de las operaciones.
+3. Juego de pruebas público.
+
+-----------------------------------------------------------------------------
+0. OBSERVACIONES PREVIAS
+-----------------------------------------------------------------------------
+
+* Para una ejecución, el número de funcionarios (N, entero mayor que 0), el
+  número de días de la agenda (D, entero mayor que 0) y el número de días
+  ya pasados sobre los que se guarda información (K, entero mayor que 0) se
+  leen como datos de inicialización y no cambian a lo largo de la ejecución.
+
+* Los identificadores de los N funcionarios son enteros entre 1 y N.
+
+* En general, los datos de operaciones diferentes se leerán en líneas
+  diferentes y los resultados de operaciones diferentes se escribirán en
+  líneas diferentes.
+
+* Los ficheros de entrada de los juegos de pruebas tendrán líneas de menos de
+  80 caracteres. Si necesitamos datos muy grandes para una misma operación,
+  los dividiremos en varias líneas.
+
+* No es necesario comprobar si los datos que se van a leer son consistentes,
+  por ejemplo, si se dice que hay N funcionarios, está garantizado que se
+  podrán leer, todos los identificadores de funcionarios estarán entre 1 y N,
+  etc. Análogamente, no habrá inconsistencias con los días, etc. También se
+  garantiza que los datos cumplirán las precondiciones mencionadas en el
+  enunciado.
+
+* A partir del juego de pruebas incluido al final de este documento no se deben
+  extrapolar propiedades de los datos que no se describan explícitamente.  Por
+  ejemplo, no es obligatorio que el día de registro de la primera operación
+  sea el 1, o que todas las citas se puedan concertar el día para el que se
+  piden, o que el número o la proporción de aplicaciones de las diversas
+  operaciones sean parecidos en general al de dicho juego de pruebas.
+
+-------------------------------------------------------------------------------
+1. COMPOSICIÓN DE LOS JUEGOS DE PRUEBAS
+-------------------------------------------------------------------------------
+
+La primera acción es leer el número N de funcionarios. A continuación se lee
+el número D de días de la agenda. Después se lee K, el número de días ya
+pasados sobre los que se guardan datos.
+
+A continuación se lee la estructura jerárquica de los N funcionarios.
+Ésta sigue el formato estándar de lectura de un árbol en preorden que se
+ha visto en las sesiones de laboratorio, con una marca igual a 0.
+
+A partir de este momento, pasamos a aplicar las distintas operaciones, cuya
+estructura viene especificada en la siguiente sección. Todas las operaciones
+llevan asociado un día de registro, que representa el momento en el que se
+realiza cada operación. En un mismo día se pueden aplicar 0 o más
+operaciones y cada operacion tiene un día de registro mayor o igual que el de
+la anterior.
+
+Se usarán los días de registro para mantener como vivas sólo las citas que
+estén en los siguientes D días, y como citas ya realizadas las citas de los K
+días anteriores. Por tanto, si el día de registro es mayor que el de la
+anterior operación, *antes de realizar la nueva operación* algunas citas
+vivas pueden pasar a ser citas ya realizadas, y algunas citas ya realizadas
+pueden desaparecer por completo.
+
+-------------------------------------------------------------------------------
+2. ENTRADA Y SALIDA DE LAS OPERACIONES
+-------------------------------------------------------------------------------
+
+* PETICIÓN DE CITA
+
+Código de operación: -1
+
+Datos: Dos números enteros. El primero es mayor que 0 y representa el día de
+registro, es decir, el día en que se hace la petición de la cita. El segundo
+es mayor o igual que 0 e indica cuál es el nivel máximo de funcionario que se
+admite para la cita. La cita se intenta concertar desde el día siguiente al
+día de registro.
+
+Salida: Ninguna.
+
+Efectos sobre el sistema: 
+
+- Si existen un día, un funcionario y una hora que cumplan las condiciones de
+la petición, se añadirá una nueva cita a la agenda. Cada cita se dotará de
+un identificador propio, en orden correlativo creciente (la primera cita
+tendrá el identificador 1, la segunda el 2, etc).
+
+- Si el día de registro crece, previamente se actualizarán las citas vivas y
+las ya realizadas.
+
+
+* ESCRITURA DE CITAS YA REALIZADAS
+
+Código de operación: -3
+
+Datos: Un entero mayor que 1 que representa el día de registro de la petición
+de escritura. Nótese que si el entero fuera 1, no habría ningún día
+anterior al día de registro. Si el entero es 2 hay un día anterior.
+
+Salida: Escribe el intervalo de días cuyas citas se van a escribir. El
+intervalo acaba el día anterior al día de registro y comienza el día 1 o K
+días antes al día de registro, dependiendo de cual de esos dos valores sea
+mayor. A continuación, escribe todas las citas de dicho intervalo.  Puede
+darse el caso que no haya ninguna cita en el mismo.
+
+Efectos sobre el sistema: si el día de registro crece, se actualizarán las
+citas vivas y las ya realizadas. La escritura del intervalo y las citas ha de
+hacerse después de la actualización.
+
+
+* ESCRITURA DE CITAS VIVAS
+
+Código de operación: -4
+
+Datos: Un entero mayor que 0 que representa el día de registro de la
+escritura.
+
+Salida: Escribe el intervalo de días cuyas citas se van a escribir. El
+intervalo comienza el día posterior al día de registro y acaba D días
+después.  A continuación, escribe todas la citas del intervalo. Puede darse
+el caso que no haya ninguna cita viva en el mismo.
+
+Efectos sobre el sistema: si el día de registro crece, se actualizarán las
+citas vivas y las ya realizadas. La escritura del intervalo y las citas ha de
+hacerse después de la actualización.
+
+
+* FINALIZAR PROGRAMA
+
+Código de operación: -5
+
+Datos: Ninguno
+
+Salida: Ninguna
+
+-------------------------------------------------------------------------------
+3. JUEGO DE PRUEBAS PÚBLICO
+-------------------------------------------------------------------------------
+
+Entrada comentada:
+------------------
+
+9  // N: número de funcionarios
+6  // D: número de días posteriores
+3  // K: número de días anteriores
+
+
+4 7 5 2 0 0 0 9 0 0 8 1 6 0 0 0 3 0 0 // Estructura jerárquica 
+                                      // de los funcionarios
+
+-1 1 2     // Petición solicitada el día 1, para una cita 
+           // de nivel menor o igual a 2
+
+-1 1 1     // Petición solicitada el día 1, para una cita 
+           // de nivel menor o igual a 1
+
+-1 1 3
+
+
+-1 1 1
+
+
+-1 1 0
+
+
+-4 1   // Escribe las citas vivas de los D días posteriores al día 1,
+       // es decir del 2 al 7 (después de haber actualizado las citas)
+
+-4 2   // Escribe las citas vivas de los D días posteriores al día 2,
+       // es decir del 3 al 8 (después de haber actualizado las citas)
+
+-3 2   // Escribe las citas realizadas el día 1,
+       // es decir, los min(K,1) días anteriores al día 2
+       // (despues de haber actualizado las citas)
+
+-1 3 0   // Petición solicitada el día 3, para una cita 
+         // de nivel menor o igual a 0
+
+-1 3 1
+
+
+-1 3 0
+
+
+-4 3   // Escribe las citas vivas de los D días posteriores al día 3,
+       // es decir del 4 al 9 (después de haber actualizado las citas)
+
+-3 5   // Escribe las citas realizadas los días 2 a 4,
+       // es decir, los K días anteriores al día 5
+       // (despues de haber actualizado las citas)
+
+-5
+
+
+Salida comentada:
+-----------------
+
+Citas vivas: el intervalo relevante de dias es 2 7
+              // Se escriben las citas vivas desde el día 2 al día 7
+
+2 4 1         // El día 2, el funcionario 4 tiene una cita y el 
+              // identificador de la cita es el 1
+
+2 7 2         // Resto de citas desde el día 2 al día 7
+2 8 3
+3 4 4
+4 4 5
+
+Citas vivas: el intervalo relevante de dias es 3 8
+3 4 4
+4 4 5
+
+Citas ya realizadas: el intervalo relevante de dias es 1 1
+             // Se escriben las citas realizadas el día 1.
+             // No hay ninguna.
+
+Citas vivas: el intervalo relevante de dias es 4 9
+4 4 5
+4 7 7
+5 4 6
+6 4 8
+
+Citas ya realizadas: el intervalo relevante de dias es 2 4 
+           // Se escriben las citas realizadas desde el día 2 al 4.
+2 4 1
+2 7 2
+2 8 3
+3 4 4
+4 4 5
+4 7 7
+
+
+-------------------------------------------------------------------------------
+
+Entrada sin comentar: 
+
+ver ficheros jpub1.in y jpub2.in
+
+-------------------------------------------------------------------------------
+
+Salida sin comentar: 
+
+ver ficheros jpub1.out y jpub2.out

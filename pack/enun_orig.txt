@@ -1,0 +1,302 @@
+			AGENDA DE UNA ADMINISTRACIÓN
+
+
+  El "Daijo-kan" (Gran Consejo de Estado) era el encargado de dirigir la 
+  Aministración de Japón durante las eras Nara (710-794) y Heian (794-1185).
+  Estaba presidido por el "Daijo Daijin" (Primer Ministro). Debajo de él 
+  estaban el "Sadaijin" (Ministro de la Izquierda) y el "Udaijin" (Ministro
+  de la Derecha). De éstos dependía el resto de niveles de la Administración.
+  
+                                           Historia de Japón, varias fuentes
+
+
+Supongamos que la Administración de un territorio determinado dispone de N
+funcionarios en total, identificados con los valores enteros 1..N (N>0).  Su
+organigrama funcionarial se organiza de manera jerárquica, de forma que cada
+funcionario tiene una posición bien definida dentro del mismo, pero no existe
+necesariamente una correspondencia entre su identificador y su posición.
+
+Dicho organigrama está presidido por una única persona, denominada "Superjefe".
+Éste trabaja directamente con un máximo de dos funcionarios "subalternos".  A
+su vez, cada uno de éstos puede disponer como máximo de otros dos subalternos y
+así sucesivamente. Los subalternos de un funcionario se refieren a éste
+simplemente como "jefe" y se distinguen entre sí mediante los calificativos
+"izquierdo" y "derecho".  Siempre que un funcionario sólo tenga un subalterno,
+se interpreta que se trata de su subalterno izquierdo.
+
+Un mismo funcionario solo puede tener un jefe y el único que no tiene jefe es
+el Superjefe.  Para poder comparar las posiciones de los funcionarios en la
+jerarquía, convenimos que el Superjefe es un funcionario de nivel 0, sus
+subalternos son funcionarios de nivel 1, los subalternos de éstos son
+funcionarios de nivel 2, etc. Diremos que los "descendientes" de un funcionario
+son sus subalternos, los subalternos de éstos y así sucesivamente hasta los
+niveles ocupados por funcionarios que no tengan ningún subalterno, a los que
+denominamos "becarios".
+
+Consideremos la siguiente Administración formada por 10 funcionarios: los
+números indican los identificadores de los mismos y las líneas indican las
+relaciones jerárquicas entre ellos.  
+                    
+                           3
+                       /       \
+                     9           10
+                   /   \       /                
+                  5     4     8
+                 / \         / \
+                1   2       6   7
+
+
+Algunos ejemplos concretos de los conceptos que acabamos de introducir son:
+
+* el funcionario 3 es el Superjefe, el 9 y el 10 son sus subalternos 
+
+* el 9 es el jefe del 4, el 8 lo es del 6, etc.
+            
+* el nivel 2 está formado por el 5, el 4 y el 8
+
+* el 6, el 7 y el 8 son los descendientes del 10
+
+
+El programa deberá mantener una agenda con las citas de los funcionarios.
+Durante toda la vida de la agenda, ésta trabajará con un tiempo interno medido
+en días. El primer día de funcionamiento será el día 1, el siguiente el 2, etc.
+
+Cada funcionario dispone exactamente de H (entero mayor que 0) horas al día
+para atender citas y para cada cita se reserva exactamente una hora. En la
+agenda solo aparecerán las H horas de cada día que han de dedicarse a atender
+citas.  La distribución de dichas horas es la misma para todos los funcionarios
+todos los días.
+
+Concertar una cita significa asignarle un identificador entero mayor que 0, un
+día, una hora reservada (entero entre 1 y H) y un funcionario.  Podremos hablar
+de la cita <312, 567, 3, 9> (la cita 312 ha sido concertada para el día 567,
+tercera hora y asignada al funcionario 9), de la cita <1923, 34, 7, 1019>, etc.
+
+A continuación presentamos todas las funcionalidades del programa.  
+
+
+Citas nuevas
+============
+
+La agenda permitirá registrar peticiones de citas nuevas en cualquier momento.
+Las peticiones registradas un día determinado solo podrán dar lugar a citas
+concertadas en alguno de los D (entero mayor que 0) días siguientes. Por
+ejemplo, si la agenda es de 30 días (D=30) y la primera petición de la vida del
+programa se registra el día 1, la cita solo podrá concertarse entre los días 2
+y 31. Si la agenda es de 90 días (D=90) y una petición se registra el día 178,
+la cita solo podrá concertarse entre los días 179 y 268 del sistema.
+
+Cuando un ciudadano necesite pedir una cita, se pondrán a su disposición dos
+modelos de petición. Usará el primero si prefiere que su cita tenga lugar en un
+dia determinado (prioridad por día) y que el sistema determine el menor nivel
+posible del funcionario; usará el segundo si prefiere que su cita se realice
+con un funcionario de un nivel menor o igual a un valor determinado (prioridad
+por nivel) y que el sistema determine el mejor día posible. Recordemos que, en
+nuestro contexto, menor nivel de funcionario significa mayor poder.
+
+Las peticiones han de incluir los siguientes datos:
+
+- día en que el ciudadano registra la petición
+
+- modelo de petición que desea utilizar
+
+- datos necesarios para el modelo elegido
+
+Nótese que una vez registrada y concertada una cita, ésta tendrá asociados dos
+días: el de su registro y el previsto para su realización. Como hemos dicho,
+habrá casos en que el día de realización no conste en la petición, sino que el
+ciudadano dejará que sea fijado por el propio sistema. Más adelante veremos que
+también habrá mecanismos para modificar algunos datos de una cita, entre ellos
+el día de realización.
+
+Dependiendo del modelo de petición, los datos que se le pedirán al ciudadano 
+y los criterios de asignación serán diferentes. Los mostramos a continuación:
+
+1) prioridad por día: el ciudadano proporciona su día y hora preferidos para la
+cita; se le asignará el funcionario de menor nivel que esté libre en ese
+momento; si no hay ninguno se repite el proceso el siguiente día a la misma
+hora y así sucesivamente.
+
+2) prioridad por nivel: el ciudadano proporciona su hora preferida y un valor
+entero no negativo n; la cita se concertará el primer día posterior al del
+registro de la petición en el que exista al menos un funcionario libre a esa
+hora, que sea de nivel menor o igual que n; se asignará el funcionario de
+menor nivel entre ellos.
+
+En ambos criterios, si existen varios funcionarios asignables del mismo nivel
+se toma el de más a la izquierda.
+
+Si no es posible encontrar días, horas o funcionarios que cumplan el criterio
+asociado al modelo de petición elegido (dentro de los D días siguientes al de
+la solicitud) la cita se considera irrealizable y no tendrá repercusión en la
+agenda.
+
+Si la cita se puede concertar, el sistema le asigna automáticamente un
+identificador.  El identificador de la primera cita concertada en el sistema
+será el 1. El resto de identificadores se asigna correlativamente según el
+orden cronológico de registro: la segunda cita concertada tendrá el
+identificador 2, la tercera el 3, etc.
+
+
+Días y horas libres: reasignación de citas 
+==========================================
+
+Un funcionario podrá pedir (sólo para sí mismo, no para otros funcionarios)
+días u horas libres en cualquier momento. Tendrá a su disposición dos modelos
+de petición, según si desea un intervalo de días completos libres o solo una
+hora suelta (si quiere varias horas sueltas libres, tendrá que realizar otras
+tantas peticiones).
+
+1) Intervalo de días libres: la petición ha de incluir los siguientes datos:
+   identificador del funcionario, día de registro de la petición de días
+   libres, primer día del intervalo, último día del intervalo. El primer día
+   del intervalo ha de ser posterior al día del registro. El último día del
+   intervalo ha de ser el mismo o posterior al primero.
+
+   Si el funcionario tiene citas en alguna hora de los días del intervalo
+   especificado en la petición, ésta se rechaza y no tiene ningún efecto sobre
+   la agenda; en caso contrario, todas las horas de dichos días se marcan como
+   no hábiles para el funcionario respecto a futuras citas, salvo los que
+   sobrepasen los D días posteriores al del registro de la petición, que no se
+   ven afectados de ninguna manera. Si dentro del intervalo hay días (u horas
+   sueltas) ya marcados como no hábiles, éstos siguen siendo no hábiles.
+
+2) Anulación de una hora suelta: la petición ha de incluir los siguientes
+   datos: identificador del funcionario, día de registro de la petición de
+   anulación, día y hora que se quieren anular. El día de la anulación ha de
+   ser posterior al día del registro. La anulación siempre se realiza, salvo si
+   su día sobrepasa los D días posteriores al del registro de la petición o si
+   la misma hora del mismo día ya ha sido anulada anteriormente, en cuyo caso
+   la anulación no tiene ningún efecto.
+
+   Tanto si el funcionario tiene una cita concertada en ese día y hora, como
+   si no, dicho par <día, hora> se marca como no hábil para futuras citas.
+
+   Además, si el funcionario (llamémoslo f) tiene una cita a esa hora, se
+   determina cuál es el descendiente (llamémoslo d) más cercano a f que esté
+   libre ese día y esa hora.  En caso de haber varios candidatos a la misma
+   distancia, se elige el de más a la izquierda.  Entonces la cita de f se le
+   asigna al subalterno (llamémoslo s) de f en dirección a d; la de s a su
+   propio subalterno en dirección a d y así sucesivamente, de forma que d se
+   queda con la cita original de su jefe y el proceso termina.
+
+   Los descendientes de f con la hora marcada como no hábil no intervienen en
+   este proceso de reasignación de citas (la cita que le tocaría a cada uno de
+   ellos ha de transmitirse al subalterno que corresponda en cada caso) pero sí
+   han de tenerse en cuenta para el cálculo del descendiente libre más cercano
+   a f.
+
+   Si f no tiene ningún descendiente libre, su cita se reasigna a partir del
+   día siguiente al día en el que la cita iba a tener lugar originalmente, con
+   los mismos criterios que las citas nuevas, manteniendo el identificador, la
+   hora, el modelo de petición (y el nivel, si el modelo lo requiere) de la
+   petición original de dicha cita.
+ 
+
+Consulta de citas ya realizadas
+===============================
+
+El rendimiento de los funcionarios de la Administración se evalúa en periodos
+de K días (K>0). El programa admitirá peticiones de consultas basadas en dicho
+valor. Cada petición requiere como dato el día en la que es registrada, que ha
+de ser mayor que 1 y producirá el listado de todas las citas atendidas en los K
+días anteriores al día de registro de la petición, ordenadas cronológicamente
+por día. Si el día de registro es menor o igual que K, se escriben las citas de
+todos los días anteriores.  Para cada día, las citas se escriben por orden
+creciente de identificador de funcionario. Para cada funcionario, han de
+aparecer ordenadas cronológicamente por hora.  Para cada cita han de escribirse
+estos tres valores, más el identificador de la cita.
+
+
+
+Consulta de citas "vivas"
+=========================
+
+Cada petición de consulta requiere como dato el día en la que es registrada.
+El programa ha de escribir todas las citas concertadas hasta el momento de la
+consulta para los D días siguientes al día de registro, ordenadas
+cronológicamente por día.  Para cada día, las citas se escriben por orden
+creciente de identificador de funcionario. Para cada funcionario, han de
+aparecer ordenadas cronológicamente por hora. Para cada cita han de escribirse
+estos tres valores, más el identificador de la cita.
+
+
+Paso de los días
+================
+
+Supondremos que el programa recibirá las peticiones de citas, anulaciones, y
+consultas en orden cronológico según el día del correspondiente registro (la
+hora de registro no es un dato relevante para ninguna operación y no se
+proporciona). En un mismo día se puede registrar cualquier cantidad de
+peticiones de cualquier tipo (incluso ninguna).
+
+Aprovecharemos el mencionado orden cronológico para usar las fechas de las
+diversas peticiones como indicativo del paso de los días. Así, tanto la
+ventana de los D días hábiles de la agenda como la de los K días relevantes de
+las citas ya realizadas irán desplazándose según vayan avanzando los días de
+registro de las sucesivas peticiones.
+
+Ejemplo: supongamos que D = 60 y K = 90 y que se han registrado todas las
+peticiones del día 134, (las citas y anulaciones de la agenda estarán
+comprendidas entre los días 135 y 194; las citas ya realizadas relevantes
+estarán comprendidas entre los días 44 y 133).
+
+En cuanto llegue la primera petición registrada el día 135, dicho día deja de
+ser hábil para nuevas citas y el 195 pasa a serlo. Análogamente, los días
+relevantes para las citas ya realizadas el día 135 pasan a ser los
+comprendidos entre el 45 y el 134.
+
+Esta situación se mantendrá mientras sigan tratándose peticiones registradas el
+día 135 y volverá a cambiar cuando se trate la primera petición del siguiente
+día. Éste ha de ser mayor o igual que 136, pero no necesariamente el 136, ya
+que puede haber días sin peticiones.
+
+
+SE PIDE
+=======
+
+Diseñar un programa modular razonablemente eficiente que permita modelar la
+agenda descrita, simulando las peticiones y anulaciones de citas, así como las
+las consultas.
+
+En primer lugar, debe leer el número total N de funcionarios, los números D y
+K de días relevantes para la agenda y las consultas y el número H de horas
+diarias dedicadas a atender citas.
+
+Seguidamente leerá el organigrama funcionarial, con las relaciones jerárquicas
+entre los diferentes funcionarios. Después tendrá que ir procesando las
+diversas tareas que se le pidan.  Estas podrán ser las siguientes:
+
+1) Petición de cita. Se proporcionará el día del registro, el modelo de
+   petición y los datos necesarios según dicho modelo. Usaremos el valor 1 para
+   indicar el modelo de prioridad por día y el valor 2 para indicar el modelo
+   de prioridad por nivel. El resto de datos son, para el modelo 1, el día y
+   hora preferidos para la cita; y, para el modelo 2, la hora y el nivel
+   preferidos para la cita
+
+2) Petición de días u horas libres. Se proporcionará el identificador del
+   funcionario, el día del registro y los datos necesarios según el modelo de
+   petición. Usaremos el valor 1 para indicar el modelo de intervalo de días
+   libres y el valor 2 para indicar el modelo de horas sueltas. El resto de
+   datos son, para el modelo 1, los dos extremos del intervalo de días libres
+   y, para el modelo 2, el día y la hora a anular
+
+3) Petición de consulta de citas ya realizadas. Sus único dato será el día del
+   registro
+
+4) Petición de consulta de citas vivas. Su único dato será el día del registro
+
+
+La forma de comunicarnos con el programa para que realice dichas tareas será
+parecida a la del caso de estudio "Cubeta" que aparece en la sesión 8 de
+laboratorio.  Podéis diseñar un esquema provisional que ya refinaréis cuando
+conozcáis el juego de pruebas público.
+
+En días sucesivos se completarán los detalles que se hayan podido pasar por
+alto en este enunciado y se publicarán las aclaraciones oportunas.
+
+La sintaxis *exacta* de los datos y resultados, acompañada del juego de pruebas
+público, se conocerá tres semanas antes del día de entrega de la práctica.
+Hasta entonces no podréis implementar de forma definitiva las operaciones de
+lectura y escritura necesarias para los tipos que utilicéis, aunque sí podréis
+especificarlas.
